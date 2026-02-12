@@ -17,7 +17,7 @@ COPY . .
 RUN npx prisma generate
 
 # Expõe a porta do Express (mude se usar outra)
-EXPOSE 8000
+EXPOSE 5305
 
 # Inicia a aplicação
 CMD ["npm", "start"] 
