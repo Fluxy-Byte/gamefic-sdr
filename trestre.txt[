@@ -1,0 +1,19 @@
+try {
+            await enviarLeadParaRD({
+                email: lead.email,
+                name: lead.nome,
+                phone: lead.telefone,
+                companyName: normalizeEmpresa(lead.contexto) ?? lead.contexto,
+                dealName,
+                tags: [
+                    dados.name_template,
+                    lead.nivelInteresse,
+                    lead.tomLead,
+                    lead.urgenciaLead
+                ].filter(Boolean) as string[]
+            });
+        } catch (err) {
+            const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+            const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+            console.error('[RD_STATION]', status ?? 'error', data ?? (err as any)?.message ?? err);
+        }
