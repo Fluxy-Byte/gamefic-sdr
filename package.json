@@ -5,7 +5,8 @@
   "main": "agent.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "adk api_server fluxy.ts -p 5203"
+    "start": "adk api_server gamefic.ts -p 5305",
+    "dev": "adk web gamefic.ts -p 5305"
   },
   "repository": {
     "type": "git",

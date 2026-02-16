@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expõe a porta do Express (mude se usar outra)
-EXPOSE 5203
+EXPOSE 5305
 
 # Inicia a aplicação
 CMD ["npm", "start"] 

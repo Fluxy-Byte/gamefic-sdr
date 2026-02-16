@@ -10,11 +10,16 @@ export interface Task {
 export interface LeadRegister {
     nome: string,
     email?: string,
-    produto?: string,
     contexto?: string,
+    solucao?: string,
+    produto?: string,
+    nivelInteresse?: string,
+    problemaCentral?: string,
+    objetivoLead?: string,
     tomLead?: string,
     urgenciaLead?: string,
     instrucao?: string,
+    localidade?: string,
     telefone: string,
     nomeAgente: string,
     telefoneAgente: string,
@@ -43,6 +48,11 @@ export async function enviarDadosDoCliente(dados: Task) {
         console.log(e)
         return false;
     }
+}
+
+export interface Task {
+    name_template: string,
+    dados: LeadRegister
 }
 
 
