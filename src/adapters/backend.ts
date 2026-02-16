@@ -36,13 +36,13 @@ export interface Metadata {
 
 export async function enviarDadosDoCliente(dados: Task) {
     try {
-
-        const url = process.env.ROTA_BACK_END ?? "https://fluxy-agente.egnehl.easypanel.host";
+        console.log(dados)
+        const url = process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host";
         const { data, status } = await axios.post(`${url}/api/v1/vendas`,
             dados
         );
 
-        console.log(data);
+        console.log(`RETORNO ENVIO PARA FILA DE VENDAS: ${JSON.stringify(data)}`);
         return status ? true : false;
     } catch (e: any) {
         console.log(e)
@@ -59,7 +59,7 @@ export interface Task {
 export async function enviarDadosDoRegistroDeLead(phone: string, name: string, metadado: Metadata, context: string) {
     try {
 
-        const url = process.env.ROTA_BACK_END ?? "https://fluxy-agente.egnehl.easypanel.host";
+        const url = process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host";
         const { data, status } = await axios.post(`${url}/api/v1/contact`,
             { phone, name, metadado, context }
         );
@@ -76,7 +76,7 @@ export async function enviarDadosDoRegistroDeLead(phone: string, name: string, m
 export async function enviarDadosDaAtualizacaoDeNome(phone: string, name: string, metadado: Metadata) {
     try {
 
-        const url = process.env.ROTA_BACK_END ?? "https://fluxy-agente.egnehl.easypanel.host";
+        const url = process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host";
         const { data, status } = await axios.put(`${url}/api/v1/contact`,
             { phone, name, metadado }
         );
@@ -88,3 +88,5 @@ export async function enviarDadosDaAtualizacaoDeNome(phone: string, name: string
         return false;
     }
 }
+
+

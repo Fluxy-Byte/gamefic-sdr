@@ -102,7 +102,7 @@ export const registerLead = new FunctionTool({
         tomLead,
         urgenciaLead,
         instrucao,
-        localidade,
+        localidade: localidade ?? "Não informada",
 
         telefone: telefoneLead,
 
@@ -113,7 +113,9 @@ export const registerLead = new FunctionTool({
           process.env.NUMBER_VENDAS ?? '5534997801829'
       };
 
-      await sendClienteToAgenteHuman(dados);
+      const resultadoDoProcesso = await sendClienteToAgenteHuman(dados);
+
+      console.log(`RESULTADO DO PROCESSO: ${resultadoDoProcesso}`)
 
       return {
         status: 'success',
@@ -165,8 +167,8 @@ export const registerNameLead = new FunctionTool({
       =============================== */
 
       const metaDados = {
-        display_phone_number: "553491713923",
-        phone_number_id: "872884792582393"
+        display_phone_number: "553491746481",
+        phone_number_id: "1021940604341981"
       }
       await enviarDadosDaAtualizacaoDeNome(telefoneLead, nome, metaDados);
 
@@ -228,8 +230,8 @@ export const errorLead = new FunctionTool({
       };
 
       const metaDados = {
-        display_phone_number: "553491713923",
-        phone_number_id: "872884792582393"
+        display_phone_number: "553491746481",
+        phone_number_id: "1021940604341981"
       }
 
       await enviarDadosDoRegistroDeLead(telefoneLead, nome, metaDados, problema);
@@ -237,8 +239,6 @@ export const errorLead = new FunctionTool({
       console.log('[SUPPORT]', dados);
 
       await error(dados);
-
-
 
       return {
         status: 'success',
@@ -297,6 +297,7 @@ Campos obrigatórios para register_lead (inferir sempre que possível):
 - tomLead
 - urgenciaLead
 - instrucao (orientação clara para o time comercial)
+- localidade (Cidade em que a empresa do lead esta)
 
 SUPORTE TÉCNICO
 - Se o cliente relatar problema técnico, utilize a ferramenta error_lead.
