@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { enviarDadosDoCliente, LeadRegister, Task } from "../../adapters/backend";
-import { createLeadInRdMarketing } from "./gerarLead";
-import type { RdLeadPayload } from "./gerarLead";
+import { createLeadInRdMarketing } from "./rd_station_crm";
+import type { RdLeadPayload } from "./rd_station_crm";
 import { v4 as uuidv4 } from 'uuid';
 
 export const sendClienteToAgenteHuman = async (dados: LeadRegister) => {

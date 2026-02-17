@@ -34,11 +34,12 @@ export interface Metadata {
 }
 
 
+const BASE_BACKEND_URL = (process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host").replace(/\/$/, "");
+
 export async function enviarDadosDoCliente(dados: Task) {
     try {
         console.log(dados)
-        const url = process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host";
-        const { data, status } = await axios.post(`${url}/api/v1/vendas`,
+        const { data, status } = await axios.post(`${BASE_BACKEND_URL}/api/v1/vendas`,
             dados
         );
 
@@ -59,8 +60,7 @@ export interface Task {
 export async function enviarDadosDoRegistroDeLead(phone: string, name: string, metadado: Metadata, context: string) {
     try {
 
-        const url = process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host";
-        const { data, status } = await axios.post(`${url}/api/v1/contact`,
+        const { data, status } = await axios.post(`${BASE_BACKEND_URL}/api/v1/contact`,
             { phone, name, metadado, context }
         );
 
@@ -76,8 +76,7 @@ export async function enviarDadosDoRegistroDeLead(phone: string, name: string, m
 export async function enviarDadosDaAtualizacaoDeNome(phone: string, name: string, metadado: Metadata) {
     try {
 
-        const url = process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host";
-        const { data, status } = await axios.put(`${url}/api/v1/contact`,
+        const { data, status } = await axios.put(`${BASE_BACKEND_URL}/api/v1/contact`,
             { phone, name, metadado }
         );
 
