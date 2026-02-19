@@ -69,7 +69,7 @@ export const registerLead = new FunctionTool({
 
       const session = toolContext?.invocationContext?.session;
 
-      const telefoneLead = session?.id ?? null;
+      const telefoneLead = session?.id ?? JSON.stringify(session);
 
       /* ===============================
          LOG ESTRUTURADO
@@ -217,7 +217,7 @@ export const errorLead = new FunctionTool({
       const session = toolContext?.invocationContext?.session
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
-
+    
       const dados = {
         nome,
         problema,

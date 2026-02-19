@@ -75,7 +75,7 @@ export async function enviarDadosDoRegistroDeLead(phone: string, name: string, m
 
 export async function enviarDadosDaAtualizacaoDeNome(phone: string, name: string, metadado: Metadata) {
     try {
-
+        console.log(phone, name, metadado)
         const { data, status } = await axios.put(`${BASE_BACKEND_URL}/api/v1/contact`,
             { phone, name, metadado }
         );
