@@ -59,9 +59,9 @@ export interface Task {
 
 export async function enviarDadosDoRegistroDeLead(phone: string, name: string, metadado: Metadata, context: string) {
     try {
-
+        const phone_number_id = metadado.phone_number_id;
         const { data, status } = await axios.post(`${BASE_BACKEND_URL}/api/v1/contact`,
-            { phone, name, metadado, context }
+            { phone, name, phone_number_id, context }
         );
 
         console.log(data);
@@ -75,9 +75,9 @@ export async function enviarDadosDoRegistroDeLead(phone: string, name: string, m
 
 export async function enviarDadosDaAtualizacaoDeNome(phone: string, name: string, metadado: Metadata) {
     try {
-        console.log(phone, name, metadado)
+        const phone_number_id = metadado.phone_number_id;
         const { data, status } = await axios.put(`${BASE_BACKEND_URL}/api/v1/contact`,
-            { phone, name, metadado }
+            { phone, name, phone_number_id }
         );
 
         console.log(data);
