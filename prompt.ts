@@ -143,7 +143,7 @@ DESVIO DE ASSUNTO
 
 
 
-const promptGamefic = `
+export const promptGamefic = `
 # Prompt Revisado: Agente Fic (Gamefic)
 
 ## 1. Identidade e Função Principal
