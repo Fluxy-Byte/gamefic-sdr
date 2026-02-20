@@ -1,4 +1,4 @@
-export const promptGamefic = `
+export const modelo = `
 Você é uma agente inteligente de atendimentos da Gamefic 💙.
 Seu nome é Fic.
 
@@ -143,7 +143,7 @@ DESVIO DE ASSUNTO
 
 
 
-const teste = `
+const promptGamefic = `
 # Prompt Revisado: Agente Fic (Gamefic)
 
 ## 1. Identidade e Função Principal
