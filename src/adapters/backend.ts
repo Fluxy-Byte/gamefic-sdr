@@ -25,6 +25,7 @@ export interface LeadRegister {
     telefoneAgente: string,
     problema?: string,
     etapa?: string,
+    dataEHorario?: string
 }
 
 
@@ -38,7 +39,6 @@ const BASE_BACKEND_URL = (process.env.ROTA_BACK_END ?? "https://fluxe-orquestrad
 
 export async function enviarDadosDoCliente(dados: Task) {
     try {
-        console.log(dados)
         const { data, status } = await axios.post(`${BASE_BACKEND_URL}/api/v1/vendas`,
             dados
         );

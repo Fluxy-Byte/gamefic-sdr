@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { FunctionTool, LlmAgent } from '@google/adk';
 import { z } from 'zod';
 import { enviarDadosDaAtualizacaoDeNome, enviarDadosDoRegistroDeLead } from './src/adapters/backend';
-import { promptGamefic } from './prompt';
+import { promptRootGamefic, promptSalesAgentGamefic, promptSupportAgentGamefic } from './prompt';
 import { error } from './src/services/tools/error';
 import { sendClienteToAgenteHuman } from './src/services/tools/sendClienteToAgenteHuman';
 
@@ -33,6 +33,8 @@ export const registerLead = new FunctionTool({
     objetivoLead: z.string().min(5, 'Objetivo fraco'),
 
     solucao: z.string().min(5, 'Solução não clara'),
+
+    dataEHorario: z.string().min(5, 'Necessario uma data e horario para que possamos entrar em contato'),
 
     tomLead: z.enum([
       'curioso',
@@ -64,7 +66,8 @@ export const registerLead = new FunctionTool({
         tomLead,
         urgenciaLead,
         instrucao,
-        localidade
+        localidade,
+        dataEHorario
       } = params;
 
       const session = toolContext?.invocationContext?.session;
@@ -85,7 +88,8 @@ export const registerLead = new FunctionTool({
         tomLead,
         urgenciaLead,
         instrucao,
-        localidade
+        localidade,
+        dataEHorario
       });
 
       /* ===============================
@@ -103,6 +107,7 @@ export const registerLead = new FunctionTool({
         tomLead,
         urgenciaLead,
         instrucao,
+        dataEHorario,
         localidade: localidade ?? "Não informada",
 
         telefone: telefoneLead,
@@ -121,7 +126,7 @@ export const registerLead = new FunctionTool({
       return {
         status: 'success',
         message:
-          'Obrigado pelo contato. Seu atendimento será continuado por um especialista.'
+          'Obrigado pelo contato. Seu atendimento será continuado por um especialista que entrara em contato o mais rapido possivel.'
       };
 
     } catch (err) {
@@ -217,7 +222,7 @@ export const errorLead = new FunctionTool({
       const session = toolContext?.invocationContext?.session
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
-    
+
       const dados = {
         nome,
         problema,
@@ -260,18 +265,27 @@ export const errorLead = new FunctionTool({
 });
 
 
-/* ======================================================
-   ROOT AGENT
-====================================================== */
+export const salesAgent = new LlmAgent({
+  name: 'vendas_gamefic',
+  model: 'gemini-2.5-flash',
+  instruction: promptSalesAgentGamefic,
+  tools: [registerLead, registerNameLead]
+});
+
+
+export const supportAgent = new LlmAgent({
+  name: 'suporte_gamefic',
+  model: 'gemini-2.5-flash',
+  instruction: promptSupportAgentGamefic,
+  tools: [errorLead, registerNameLead]
+});
+
 
 export const rootAgent = new LlmAgent({
   name: 'sales_agent_fluxy',
-
   model: 'gemini-2.5-flash',
-
-  instruction: promptGamefic,
-
-  tools: [registerLead, registerNameLead, errorLead]
+  instruction: promptRootGamefic,
+  subAgents: [salesAgent, supportAgent]
 });
 
 /* ======================================================
@@ -280,7 +294,3 @@ export const rootAgent = new LlmAgent({
    npx adk web
    npx adk api_server
 ====================================================== */
-
-
-
-
