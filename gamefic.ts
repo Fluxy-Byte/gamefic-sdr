@@ -6,6 +6,7 @@ import { enviarDadosDaAtualizacaoDeNome, enviarDadosDoRegistroDeLead } from './s
 import { promptRootGamefic, promptSalesAgentGamefic, promptSupportAgentGamefic } from './prompt';
 import { error } from './src/services/tools/error';
 import { sendClienteToAgenteHuman } from './src/services/tools/sendClienteToAgenteHuman';
+import { getContact } from '@/services/tools/getContacto';
 
 /* ======================================================
    TYPES
@@ -28,11 +29,9 @@ export const registerLead = new FunctionTool({
 
     contexto: z.string().min(10, 'Contexto insuficiente'),
 
-    problemaCentral: z.string().min(10, 'Problema mal definido'),
 
-    objetivoLead: z.string().min(5, 'Objetivo fraco'),
 
-    solucao: z.string().min(5, 'Solução não clara'),
+    empresa: z.string().min(5, 'Empresa não clara'),
 
     dataEHorario: z.string().min(5, 'Necessario uma data e horario para que possamos entrar em contato'),
 
@@ -42,16 +41,7 @@ export const registerLead = new FunctionTool({
       'analitico',
       'decisor',
       'cetico'
-    ]),
-
-    urgenciaLead: z.enum([
-      'baixa',
-      'media',
-      'alta'
-    ]),
-
-    instrucao: z.string().min(10, 'Instrução incompleta'),
-    localidade: z.string().optional()
+    ])
   }),
 
   execute: async (params, toolContext: SessionContext) => {
@@ -60,13 +50,7 @@ export const registerLead = new FunctionTool({
         nome,
         email,
         contexto,
-        problemaCentral,
-        objetivoLead,
-        solucao,
         tomLead,
-        urgenciaLead,
-        instrucao,
-        localidade,
         dataEHorario
       } = params;
 
@@ -82,13 +66,7 @@ export const registerLead = new FunctionTool({
         nome,
         email,
         contexto,
-        problemaCentral,
-        objetivoLead,
-        solucao,
         tomLead,
-        urgenciaLead,
-        instrucao,
-        localidade,
         dataEHorario
       });
 
@@ -101,15 +79,9 @@ export const registerLead = new FunctionTool({
         email,
         contexto,
         produto: contexto,
-        nivelInteresse: solucao,
-        problemaCentral,
-        objetivoLead,
         tomLead,
-        urgenciaLead,
-        instrucao,
         dataEHorario,
-        localidade: localidade ?? "Não informada",
-
+        
         telefone: telefoneLead,
 
         nomeAgente:
@@ -191,6 +163,48 @@ export const registerNameLead = new FunctionTool({
         status: 'error',
         message:
           'Falha ao registrar nome do lead. Tente novamente.'
+      };
+    }
+  }
+});
+
+
+export const getDetailsContact = new FunctionTool({
+  name: 'pegar_detalhes_de_cliente',
+  description: 'Coletar os dados de um cliente',
+
+
+  execute: async (toolContext: SessionContext) => {
+    try {
+
+      const session = toolContext?.invocationContext?.session;
+
+      const telefoneLead = session?.id ?? JSON.stringify(session);
+
+      const metaDados = {
+        display_phone_number: "553491746481",
+        phone_number_id: "1021940604341981"
+      }
+      const resultado = await getContact(telefoneLead);
+
+      return {
+        status: 'success',
+        message: 'Dados do contato',
+        contato: resultado
+      };
+
+    } catch (err) {
+      console.error('[REGISTER ERROR]', err);
+
+      return {
+        status: 'error',
+        message: 'Falha ao consultar contato então e necessario coletar os dados menos o telefone.',
+        contato: {
+          phone: "",
+          name: "",
+          email: "",
+          empresa: ""
+        }
       };
     }
   }
@@ -285,7 +299,8 @@ export const rootAgent = new LlmAgent({
   name: 'sales_agent_fluxy',
   model: 'gemini-2.5-flash',
   instruction: promptRootGamefic,
-  subAgents: [salesAgent, supportAgent]
+  subAgents: [salesAgent, supportAgent],
+  tools: [getDetailsContact]
 });
 
 /* ======================================================

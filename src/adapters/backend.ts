@@ -13,19 +13,14 @@ export interface LeadRegister {
     contexto?: string,
     solucao?: string,
     produto?: string,
-    nivelInteresse?: string,
-    problemaCentral?: string,
-    objetivoLead?: string,
     tomLead?: string,
-    urgenciaLead?: string,
-    instrucao?: string,
-    localidade?: string,
     telefone: string,
     nomeAgente: string,
     telefoneAgente: string,
     problema?: string,
     etapa?: string,
     dataEHorario?: string
+    empresa?: string
 }
 
 

@@ -23,10 +23,10 @@ export const sendClienteToAgenteHuman = async (dados: LeadRegister) => {
         const dealName = (() => {
             const empresa = normalizeEmpresa(dados.contexto);
             const cliente = dados.nome?.trim();
-            const cidade = dados.localidade?.trim();
+            const cidade = "Não coletada" ;
             return [empresa, cliente, cidade].filter(Boolean).join(' - ') ||
-                dados.objetivoLead ||
-                dados.problemaCentral ||
+                dados.contexto ||
+                dados.empresa ||
                 dados.nome;
         })();
 
@@ -38,9 +38,9 @@ export const sendClienteToAgenteHuman = async (dados: LeadRegister) => {
             dealName,
             tags: [
                 "chegou_mais_um_lead",
-                dados.nivelInteresse,
+                dados.contexto,
                 dados.tomLead,
-                dados.urgenciaLead
+                dados.dataEHorario
             ].filter(Boolean) as string[]
         })
 
