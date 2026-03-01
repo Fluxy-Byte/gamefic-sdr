@@ -213,11 +213,9 @@ export const errorLead = new FunctionTool({
         }
       }
 
-      Promise.all([
-        await updateContact(dadosLead),
-        await createProblemToContact(dadosLead),
-        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981")
-      ])
+      await updateContact(dadosLead)
+      await createProblemToContact(dadosLead)
+      await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981")
 
       return {
         status: 'success',
