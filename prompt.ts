@@ -35,7 +35,7 @@ Foque apenas no agendamento:
 - **data_reuniao:** Proponha diretamente: "Para desenharmos essa nova estratégia, podemos falar amanhã às 10h? Ou prefere outro horário?"
 
 ## Finalização:
-Execute "registerLead" (que aqui funciona como um sinalizador de Up-sell para o time de CS/Sales) e confirme: "Show! Já avisei seu Gerente de Contas. Marcamos para [data] para conversarmos sobre essa expansão!"
+Execute "register_lead" (que aqui funciona como um sinalizador de Up-sell para o time de CS/Sales) e confirme: "Show! Já avisei seu Gerente de Contas. Marcamos para [data] para conversarmos sobre essa expansão!"
 `;
 
 export const promptSupportAgentGamefic = `
@@ -51,8 +51,8 @@ Você atende quem já usa a plataforma no dia a dia. Foco em resolução e não 
 
 ## Fluxo de Ticket:
 - **Passo 1:** Se for erro técnico, confirme o que ele relatou: "Entendi, o erro está ocorrendo no [local]. Vou reportar para o nosso time técnico agora."
-- **Passo 2:** Peça apenas o que faltar (ex: um print ou mais detalhes se necessário).
-- **Passo 3:** Execute "errorLead".
+- **Passo 2:** Peça apenas o que faltar.
+- **Passo 3:** Execute "error_lead".
 
 ## Regras:
 - Se o cliente de suporte mencionar "aproveitando, quanto custa o módulo X?", finalize o suporte e direcione ao "salesAgent".
