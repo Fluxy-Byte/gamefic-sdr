@@ -151,8 +151,8 @@ export const getDetailsContact = new FunctionTool({
 
       const session = toolContext?.invocationContext?.session;
 
-      const telefoneLead = session?.id ?? "";
-
+      const telefoneLead = session?.id ?? JSON.stringify(session);
+      console.log(session)
       const resultado = await getContact(telefoneLead);
 
       console.log('[Dados do cliente]', resultado);
