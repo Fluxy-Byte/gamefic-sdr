@@ -2,7 +2,6 @@ import 'dotenv/config';
 
 import { FunctionTool, LlmAgent } from '@google/adk';
 import { z } from 'zod';
-import { enviarDadosDaAtualizacaoDeNome, enviarDadosDoRegistroDeLead } from './src/adapters/backend';
 import { promptRootGamefic, promptSalesAgentGamefic, promptSupportAgentGamefic } from './prompt';
 import { createProblemToContact } from './src/services/handleProblems';
 import { createMeetToContact } from './src/services/handleMeet';
@@ -146,13 +145,13 @@ export const getDetailsContact = new FunctionTool({
   name: 'pegar_detalhes_de_cliente',
   description: 'Coletar os dados de um cliente',
 
-  execute: async (toolContext: SessionContext) => {
-    try {
-
+  execute: async (params: any, toolContext: SessionContext) => {
+    try { 
+      
       const session = toolContext?.invocationContext?.session;
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
-      console.log(session)
+     
       const resultado = await getContact(telefoneLead);
 
       console.log('[Dados do cliente]', resultado);
