@@ -155,6 +155,7 @@ export const getDetailsContact = new FunctionTool({
 
       const resultado = await getContact(telefoneLead);
 
+      console.log('[Dados do cliente]', resultado);
       return {
         status: 'success',
         message: 'Dados do contato para utilização de contexto',
