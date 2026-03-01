@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Contact } from "@/adapters/inteface"
+import { UpdateContact } from "./interface";
 
 const BASE_BACKEND_URL = (process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host").replace(/\/$/, "");
 
@@ -39,4 +40,39 @@ interface Result {
     status: boolean,
     message: string
     contato: Contact | null
+}
+
+export async function updateContact(contato: UpdateContact) {
+    try {
+        const responseUpdateUser = await axios.put(`${BASE_BACKEND_URL}/api/v1/contact`,
+            {
+                email: contato.email,
+                name: contato.name,
+                phone: contato.phone,
+                empresa: contato.empresa
+            }
+        );
+
+        console.log(`RETORNO UPDATE CONTATO: ${JSON.stringify(responseUpdateUser.data)}`);
+
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+}
+
+export async function updateNameContact(phone: string, name: string) {
+    try {
+        const responseUpdateUser = await axios.put(`${BASE_BACKEND_URL}/api/v1/contact/name`,
+            {
+                name: name,
+                phone: phone
+            }
+        );
+
+        console.log(`RETORNO UPDATE NAME CONTATO: ${JSON.stringify(responseUpdateUser.data)}`);
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
 }

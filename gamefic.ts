@@ -4,9 +4,10 @@ import { FunctionTool, LlmAgent } from '@google/adk';
 import { z } from 'zod';
 import { enviarDadosDaAtualizacaoDeNome, enviarDadosDoRegistroDeLead } from './src/adapters/backend';
 import { promptRootGamefic, promptSalesAgentGamefic, promptSupportAgentGamefic } from './prompt';
-import { error } from './src/services/tools/error';
-import { sendClienteToAgenteHuman } from './src/services/tools/sendClienteToAgenteHuman';
-import { getContact } from '@/services/tools/getContacto';
+import { createProblemToContact } from './src/services/handleProblems';
+import { createMeetToContact } from './src/services/handleMeet';
+import { getContact, updateContact, updateNameContact } from './src/services/contact';
+import { sendNotificationSquadSales } from './src/services/sendNotificationSquadSales';
 
 /* ======================================================
    TYPES
@@ -24,34 +25,21 @@ export const registerLead = new FunctionTool({
   description: 'Registra um lead B2B qualificado no sistema Gamefic',
 
   parameters: z.object({
-    nome: z.string().min(2, 'Nome inválido'),
+    name: z.string().min(2, 'Nome inválido'),
     email: z.string().email('Email inválido'),
-
-    contexto: z.string().min(10, 'Contexto insuficiente'),
-
-
-
     empresa: z.string().min(5, 'Empresa não clara'),
-
-    dataEHorario: z.string().min(5, 'Necessario uma data e horario para que possamos entrar em contato'),
-
-    tomLead: z.enum([
-      'curioso',
-      'engajado',
-      'analitico',
-      'decisor',
-      'cetico'
-    ])
+    contexto_da_reuniao: z.string().min(10, 'Contexto insuficiente sobre oque o gliente que contratar a solução'),
+    data_reuniao: z.string().min(5, 'Data da reunião inválida'),
   }),
 
   execute: async (params, toolContext: SessionContext) => {
     try {
       const {
-        nome,
+        name,
         email,
-        contexto,
-        tomLead,
-        dataEHorario
+        empresa,
+        data_reuniao,
+        contexto_da_reuniao
       } = params;
 
       const session = toolContext?.invocationContext?.session;
@@ -63,37 +51,34 @@ export const registerLead = new FunctionTool({
       =============================== */
 
       console.log('[NEW LEAD]', {
-        nome,
+        name,
         email,
-        contexto,
-        tomLead,
-        dataEHorario
+        empresa,
+        data_reuniao,
+        contexto_da_reuniao,
+        telefoneLead
       });
 
       /* ===============================
          PAYLOAD
       =============================== */
 
-      const dados = {
-        nome,
-        email,
-        contexto,
-        produto: contexto,
-        tomLead,
-        dataEHorario,
-        
-        telefone: telefoneLead,
+      const dadosLead = {
+        email: email,
+        name: name,
+        phone: telefoneLead,
+        empresa: empresa,
+        dadosReunia: {
+          data_reuniao: data_reuniao,
+          contexto_da_reuniao: contexto_da_reuniao
+        }
+      }
 
-        nomeAgente:
-          process.env.NOME_AGENTE_VENDAS ?? 'Agente Gamefic',
-
-        telefoneAgente:
-          process.env.NUMBER_VENDAS ?? '5534997801829'
-      };
-
-      const resultadoDoProcesso = await sendClienteToAgenteHuman(dados);
-
-      console.log(`RESULTADO DO PROCESSO: ${resultadoDoProcesso}`)
+      Promise.all([
+        await updateContact(dadosLead),
+        await createMeetToContact(dadosLead),
+        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981")
+      ])
 
       return {
         status: 'success',
@@ -119,7 +104,7 @@ export const registerNameLead = new FunctionTool({
   description: 'Registra o nome capturado do lead para o time comercial',
 
   parameters: z.object({
-    nome: z.string().min(2, 'Nome inválido')
+    nome: z.string().min(3, 'Nome inválido')
   }),
 
   execute: async (params, toolContext: SessionContext) => {
@@ -132,23 +117,11 @@ export const registerNameLead = new FunctionTool({
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
 
-      /* ===============================
-         LOG ESTRUTURADO
-      =============================== */
-
       console.log('[Atualizado nome do Lead]', {
         nome
       });
 
-      /* ===============================
-         PAYLOAD
-      =============================== */
-
-      const metaDados = {
-        display_phone_number: "553491746481",
-        phone_number_id: "1021940604341981"
-      }
-      await enviarDadosDaAtualizacaoDeNome(telefoneLead, nome, metaDados);
+      await updateNameContact(telefoneLead, nome);
 
       return {
         status: 'success',
@@ -173,7 +146,6 @@ export const getDetailsContact = new FunctionTool({
   name: 'pegar_detalhes_de_cliente',
   description: 'Coletar os dados de um cliente',
 
-
   execute: async (toolContext: SessionContext) => {
     try {
 
@@ -181,15 +153,11 @@ export const getDetailsContact = new FunctionTool({
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
 
-      const metaDados = {
-        display_phone_number: "553491746481",
-        phone_number_id: "1021940604341981"
-      }
       const resultado = await getContact(telefoneLead);
 
       return {
         status: 'success',
-        message: 'Dados do contato',
+        message: 'Dados do contato para utilização de contexto',
         contato: resultado
       };
 
@@ -216,54 +184,45 @@ export const errorLead = new FunctionTool({
   description: 'Registra problemas técnicos do cliente',
 
   parameters: z.object({
-    nome: z.string().min(2),
-
-    problema: z.string().min(5),
-
-    etapa: z.enum([
-      'login',
-      'plataforma',
-      'pagamento',
-      'acesso',
-      'outro'
-    ])
+    name: z.string().min(2, 'Nome inválido'),
+    email: z.string().email('Email inválido'),
+    empresa: z.string().min(5, 'Empresa não clara'),
+    contexto_da_conversa: z.string().min(10, 'Contexto insuficiente sobre oque o gliente que contratar a solução'),
+    data_do_problema: z.string().min(5, 'Data da reunião inválida'),
+    local_do_problema: z.string().min(5, 'Local do problema não claro')
   }),
+
 
   execute: async (params, toolContext: SessionContext) => {
     try {
-      const { nome, problema, etapa } = params;
+      const { name, email, empresa, contexto_da_conversa, data_do_problema, local_do_problema } = params;
 
       const session = toolContext?.invocationContext?.session
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
 
-      const dados = {
-        nome,
-        problema,
-        etapa,
-        telefone: telefoneLead,
-        nomeAgente:
-          process.env.NOME_AGENTE_SUPORTE ?? 'Suporte Cardoso',
-
-        telefoneAgente:
-          process.env.NUMBER_SUPORTE ?? '5534997801829'
-      };
-
-      const metaDados = {
-        display_phone_number: "553491746481",
-        phone_number_id: "1021940604341981"
+      const dadosLead = {
+        email: email,
+        name: name,
+        phone: telefoneLead,
+        empresa: empresa,
+        problemasContato: {
+          data_do_problema: data_do_problema,
+          local_do_problema: local_do_problema,
+          contexto_da_conversa: contexto_da_conversa
+        }
       }
 
-      await enviarDadosDoRegistroDeLead(telefoneLead, nome, metaDados, problema);
-
-      console.log('[SUPPORT]', dados);
-
-      await error(dados);
+      Promise.all([
+        await updateContact(dadosLead),
+        await createProblemToContact(dadosLead),
+        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981")
+      ])
 
       return {
         status: 'success',
         message:
-          `Obrigado, ${nome}. Nosso suporte já recebeu sua solicitação.`
+          `Obrigado, ${name}. Nosso suporte já recebeu sua solicitação.`
       };
 
     } catch (err) {
