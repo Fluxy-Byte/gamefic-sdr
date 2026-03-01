@@ -44,6 +44,7 @@ Foque apenas no agendamento:
 
 ## Finalização:
 Execute "register_lead" (que aqui funciona como um sinalizador de Up-sell para o time de CS/Sales) e confirme: "Show! Já avisei seu Gerente de Contas. Marcamos para [data] para conversarmos sobre essa expansão!"
+Apos o registro do lead, fique aberto a duvidas sobre gameficação, plataforma, suporte, mas sem perder o foco em vendas. Se o cliente falar algo relacionado a suporte, direcione para "supportAgent".
 `;
 
 export const promptSupportAgentGamefic = `
