@@ -6,9 +6,10 @@ const BASE_BACKEND_URL = (process.env.ROTA_BACK_END ?? "https://fluxe-orquestrad
 
 export async function getContact(phone: string) {
     try {
+        console.log(`Buscando contato com telefone: ${phone}`);
         const { data } = await axios.get(`${BASE_BACKEND_URL}/api/v1/contact?phone=${phone}`);
         const resultado: Result = data;
-
+       // console.log(`RETORNO GET CONTATO: ${JSON.stringify(resultado)}`);
         if (resultado.contato) {
             return {
                 phone,
@@ -27,6 +28,7 @@ export async function getContact(phone: string) {
 
     } catch (e: any) {
         console.log(e);
+        console.log(`Erro ao buscar contato com telefone: ${phone}. Retornando contato vazio.`);
         return {
             phone,
             name: "",
