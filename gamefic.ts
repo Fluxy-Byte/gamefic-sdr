@@ -77,7 +77,7 @@ export const registerLead = new FunctionTool({
       Promise.all([
         await updateContact(dadosLead),
         await createMeetToContact(dadosLead),
-        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981")
+        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981", "5534997801829")
       ])
 
       return {
@@ -215,7 +215,7 @@ export const errorLead = new FunctionTool({
 
       await updateContact(dadosLead)
       await createProblemToContact(dadosLead)
-      await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981")
+      await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981", "5534997801829")
 
       return {
         status: 'success',
