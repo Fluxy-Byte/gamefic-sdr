@@ -14,6 +14,7 @@ import { sendNotificationSquadSales } from './src/services/sendNotificationSquad
 
 type SessionContext = any;
 
+const NumberSquadSales = "556294079088"
 
 /* ======================================================
    REGISTER LEAD TOOL
@@ -76,7 +77,7 @@ export const registerLead = new FunctionTool({
       Promise.all([
         await updateContact(dadosLead),
         await createMeetToContact(dadosLead),
-        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981", "5534997801829")
+        await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981", NumberSquadSales)
       ])
 
       return {
@@ -146,12 +147,12 @@ export const getDetailsContact = new FunctionTool({
   description: 'Coletar os dados de um cliente',
 
   execute: async (params: any, toolContext: SessionContext) => {
-    try { 
-      
+    try {
+
       const session = toolContext?.invocationContext?.session;
 
       const telefoneLead = session?.id ?? JSON.stringify(session);
-     
+
       const resultado = await getContact(telefoneLead);
 
       console.log('[Dados do cliente]', resultado);
@@ -215,7 +216,7 @@ export const errorLead = new FunctionTool({
 
       await updateContact(dadosLead)
       await createProblemToContact(dadosLead)
-      await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981", "5534997801829")
+      await sendNotificationSquadSales("chegou_mais_um_lead", telefoneLead, "1021940604341981", NumberSquadSales)
 
       return {
         status: 'success',
