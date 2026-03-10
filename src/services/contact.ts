@@ -16,7 +16,7 @@ export async function getContact(phone: string) {
                 name: resultado.contato.name,
                 email: resultado.contato.email,
                 empresa: resultado.contato.empresa,
-                reunioesAgendadas: [...(resultado.contato.reunioes ?? []), ...(resultado.contato.problemas ?? [])]
+                reunioesAgendadas: [...(resultado.contato.reunioesContato ?? []), ...(resultado.contato.problemasContato ?? [])]
             }
         } else {
             return {
