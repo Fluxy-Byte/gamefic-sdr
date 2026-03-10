@@ -9,20 +9,22 @@ export async function getContact(phone: string) {
         console.log(`Buscando contato com telefone: ${phone}`);
         const { data } = await axios.get(`${BASE_BACKEND_URL}/api/v1/contact?phone=${phone}`);
         const resultado: Result = data;
-       // console.log(`RETORNO GET CONTATO: ${JSON.stringify(resultado)}`);
+        // console.log(`RETORNO GET CONTATO: ${JSON.stringify(resultado)}`);
         if (resultado.contato) {
             return {
                 phone,
                 name: resultado.contato.name,
                 email: resultado.contato.email,
-                empresa: resultado.contato.empresa
+                empresa: resultado.contato.empresa,
+                reunioesAgendadas: [...(resultado.contato.reunioes ?? []), ...(resultado.contato.problemas ?? [])]
             }
         } else {
             return {
                 phone,
                 name: "",
                 email: "",
-                empresa: ""
+                empresa: "",
+                reunioesAgendadas: []
             }
         }
 
@@ -33,7 +35,8 @@ export async function getContact(phone: string) {
             phone,
             name: "",
             email: "",
-            empresa: ""
+            empresa: "",
+            reunioesAgendadas: []
         }
     }
 }

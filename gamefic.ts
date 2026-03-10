@@ -180,6 +180,48 @@ export const getDetailsContact = new FunctionTool({
 });
 
 
+export const getDateActualy = new FunctionTool({
+  name: 'get_date_actualy',
+  description: 'Coletar a data atual e dia da semana',
+
+  execute: async (params: any, toolContext: SessionContext) => {
+    try {
+
+      const date = getDataComDiaSemana()
+
+      return date
+
+    } catch (err) {
+
+      return "Falha ao coletar data atual."
+    }
+  }
+});
+
+function getDataComDiaSemana(): string {
+  const hoje = new Date();
+
+  const diasSemana = [
+    "Domingo",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado"
+  ];
+
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const ano = hoje.getFullYear();
+
+  const diaSemana = diasSemana[hoje.getDay()];
+
+  return `${dia}/${mes}/${ano} - ${diaSemana}`;
+}
+
+
+
 export const errorLead = new FunctionTool({
   name: 'error_lead',
   description: 'Registra problemas técnicos do cliente',
@@ -241,7 +283,7 @@ export const salesAgent = new LlmAgent({
   name: 'vendas_gamefic',
   model: 'gemini-2.5-flash',
   instruction: promptSalesAgentGamefic,
-  tools: [registerLead, registerNameLead]
+  tools: [registerLead, registerNameLead, getDateActualy]
 });
 
 
