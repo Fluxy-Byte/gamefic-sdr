@@ -28,12 +28,18 @@ export async function createMeetToContact(contato: UpdateContact) {
             return;
         }
 
+        const dealNameParts = [
+            contato.empresa?.trim() || 'Empresa não informada',
+            contato.name?.trim() || 'Contato sem nome',
+            contato.dadosReunia?.data_reuniao?.trim() || 'Data não informada'
+        ];
+
         const rdPayload: RdLeadPayload = {
             email: contato.email,
             name: contato.name,
             phone: contato.phone,
             companyName: contato.empresa,
-            dealName: contato.empresa ?? contato.name ?? 'Reunião Gamefic',
+            dealName: dealNameParts.join(' - '),
             tags: [
                 'lead_gamefic',
                 'reuniao_agendada',

@@ -15,7 +15,6 @@ import { sendNotificationSquadSales } from './src/services/sendNotificationSquad
 type SessionContext = any;
 
 const NumberSquadSales = "556294079088"
-const telefoneLeadMock = "553492325278";
 
 /* ======================================================
    REGISTER LEAD TOOL
@@ -43,7 +42,8 @@ export const registerLead = new FunctionTool({
         contexto_da_reuniao
       } = params;
 
-      const telefoneLead = telefoneLeadMock;
+      const session = toolContext?.invocationContext?.session;
+      const telefoneLead = session?.id ?? JSON.stringify(session);
 
       /* ===============================
          LOG ESTRUTURADO
@@ -112,7 +112,8 @@ export const registerNameLead = new FunctionTool({
         nome
       } = params;
 
-      const telefoneLead = telefoneLeadMock;
+      const session = toolContext?.invocationContext?.session;
+      const telefoneLead = session?.id ?? JSON.stringify(session);
 
       console.log('[Atualizado nome do Lead]', {
         nome
@@ -146,7 +147,8 @@ export const getDetailsContact = new FunctionTool({
   execute: async (params: any, toolContext: SessionContext) => {
     try {
 
-      const telefoneLead = telefoneLeadMock;
+      const session = toolContext?.invocationContext?.session;
+      const telefoneLead = session?.id ?? JSON.stringify(session);
 
       const resultado = await getContact(telefoneLead);
 
@@ -164,7 +166,7 @@ export const getDetailsContact = new FunctionTool({
         status: 'error',
         message: 'Falha ao consultar contato então e necessario coletar os dados menos o telefone.',
         contato: {
-          phone: telefoneLeadMock,
+          phone: "",
           name: "",
           email: "",
           empresa: ""
@@ -235,7 +237,9 @@ export const errorLead = new FunctionTool({
     try {
       const { name, email, empresa, contexto_da_conversa, data_do_problema, local_do_problema } = params;
 
-      const telefoneLead = telefoneLeadMock;
+      const session = toolContext?.invocationContext?.session
+
+      const telefoneLead = session?.id ?? JSON.stringify(session);
 
       const dadosLead = {
         email: email,
