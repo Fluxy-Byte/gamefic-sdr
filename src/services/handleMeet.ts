@@ -21,6 +21,32 @@ export async function createMeetToContact(contato: UpdateContact) {
         );
 
         console.log(`RETORNO CREATE MEET: ${JSON.stringify(responseCreateMeet.data)}`);
+
+        // Tenta registrar/atualizar o lead também no RD (opcional, não bloqueia o fluxo)
+        if (!contato.email) {
+            console.log('[RD] pulando envio: contato sem email');
+            return;
+        }
+
+        const rdPayload: RdLeadPayload = {
+            email: contato.email,
+            name: contato.name,
+            phone: contato.phone,
+            companyName: contato.empresa,
+            dealName: contato.empresa ?? contato.name ?? 'Reunião Gamefic',
+            tags: [
+                'lead_gamefic',
+                'reuniao_agendada',
+                contato.dadosReunia?.contexto_da_reuniao
+            ].filter(Boolean) as string[],
+            customFields: {
+                data_reuniao: contato.dadosReunia?.data_reuniao,
+                contexto_da_reuniao: contato.dadosReunia?.contexto_da_reuniao
+            }
+        };
+
+        const rdResult = await enviarLeadParaRD(rdPayload);
+        console.log(`[RD] resultado lead: ${JSON.stringify(rdResult)}`);
     } catch (e) {
         console.log(e);
         return false;

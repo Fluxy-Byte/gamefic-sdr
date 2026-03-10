@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { UpdateContact } from "./interface";
 
-const BASE_BACKEND_URL = (process.env.ROTA_BACK_END ?? "https://fluxe-orquestrador.egnehl.easypanel.host").replace(/\/$/, "");
+const BASE_BACKEND_URL = (process.env.ROTA_BACK_END ?? "https://gamefic-orquestrador.egnehl.easypanel.host").replace(/\/$/, "");
 
 export async function createProblemToContact(contato: UpdateContact) {
     try {

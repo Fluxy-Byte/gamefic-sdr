@@ -1,7 +1,8 @@
 const EXPIRY_SAFETY_SECONDS = 300; // 5 min de folga
 
 export function isTokenExpired(expiresAt?: string | number | null): boolean {
-  if (expiresAt == null) return false;
+  // Se não há informação de expiração, assuma expirado para forçar refresh/renovação
+  if (expiresAt == null) return true;
   const expiryMs =
     typeof expiresAt === 'number'
       ? expiresAt
@@ -18,6 +19,6 @@ export function computeExpiresAt(expiresIn?: number): number {
 
 export function formatExpiresAt(expiresIn?: number): string {
   const ms = computeExpiresAt(expiresIn);
-  const iso = new Date(ms).toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
-  return iso;
+  // ISO 8601 com 'T' e 'Z', sem milissegundos (ex: 2026-03-09T00:00:07Z)
+  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
