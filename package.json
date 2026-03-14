@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "adk api_server gamefic.ts -p 5305",
-    "dev": "adk web gamefic.ts -p 5305"
+    "dev": "adk web gamefic.ts -p 5305",
+    "rd:refresh:test": "tsx scripts/test-rd-refresh.ts"
   },
   "repository": {
     "type": "git",

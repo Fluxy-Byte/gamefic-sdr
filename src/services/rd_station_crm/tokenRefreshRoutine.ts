@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { callWithLog } from './callWithLog';
 import { fetchTokenFromCrm } from './fetchTokenFromCrm';
 import { formatExpiresAt, isTokenExpired } from './isTokenExpired';
@@ -6,15 +7,23 @@ import { requestToken } from './requestToken';
 
 const REFRESH_BEFORE_EXPIRY_MS = 5 * 60 * 1000;
 const RETRY_DELAY_MS = 60 * 1000;
+const INVALID_CLIENT_RETRY_DELAY_MS = 10 * 60 * 1000;
 const TOKEN_PLACEHOLDERS = new Set(['refresh_token_aqui', 'undefined', 'null']);
 
 let refreshTimer: NodeJS.Timeout | null = null;
 let routineStarted = false;
 let refreshInFlight = false;
 
+function cleanSecret(value?: string | null): string | null {
+  if (!value) return null;
+  const cleaned = value.trim().replace(/^['"]|['"]$/g, '');
+  return cleaned || null;
+}
+
 function hasUsableRefreshToken(value?: string | null): value is string {
-  if (!value) return false;
-  return !TOKEN_PLACEHOLDERS.has(value.trim().toLowerCase());
+  const cleaned = cleanSecret(value);
+  if (!cleaned) return false;
+  return !TOKEN_PLACEHOLDERS.has(cleaned.toLowerCase());
 }
 
 function parseExpiryMs(expiresAt?: string | number | null): number | null {
@@ -42,20 +51,25 @@ function scheduleRefresh(delayMs: number, reason: string) {
   });
 
   refreshTimer = setTimeout(() => {
-    void runScheduledRefresh(`timer:${reason}`);
+    void runScheduledRefresh(reason);
   }, normalizedDelay);
 
   refreshTimer.unref?.();
 }
 
-async function refreshAccessToken(refreshToken: string) {
-  const clientId = process.env.RD_CLIENT_ID;
-  const clientSecret = process.env.RD_CLIENT_SECRET;
+async function refreshAccessToken(refreshTokenValue: string) {
+  const clientId = cleanSecret(process.env.RD_CLIENT_ID);
+  const clientSecret = cleanSecret(process.env.RD_CLIENT_SECRET);
+  const refreshToken = cleanSecret(refreshTokenValue);
 
   if (!clientId || !clientSecret) {
     throw new Error(
       'Credenciais da RD Station ausentes. Configure RD_CLIENT_ID e RD_CLIENT_SECRET no ambiente.'
     );
+  }
+
+  if (!refreshToken) {
+    throw new Error('Refresh token da RD Station ausente/invalido.');
   }
 
   const refreshBody = new URLSearchParams({
@@ -84,10 +98,10 @@ async function refreshAccessToken(refreshToken: string) {
 
 async function scheduleFromCurrentTokenState() {
   const storedTokens = await fetchTokenFromCrm();
-  const refreshToken = storedTokens?.refresh_token ?? process.env.RD_REFRESH_TOKEN;
+  const refreshToken = cleanSecret(storedTokens?.refresh_token);
 
   if (!hasUsableRefreshToken(refreshToken)) {
-    console.warn('[RD_STATION] Refresh token indisponivel. Nova tentativa sera feita em breve.');
+    console.warn('[RD_STATION] Refresh token indisponivel no banco. Nova tentativa sera feita em breve.');
     scheduleRefresh(RETRY_DELAY_MS, 'refresh_token_unavailable');
     return;
   }
@@ -108,10 +122,10 @@ async function runScheduledRefresh(trigger: string) {
 
   try {
     const storedTokens = await fetchTokenFromCrm();
-    const refreshToken = storedTokens?.refresh_token ?? process.env.RD_REFRESH_TOKEN;
+    const refreshToken = cleanSecret(storedTokens?.refresh_token);
 
     if (!hasUsableRefreshToken(refreshToken)) {
-      scheduleRefresh(RETRY_DELAY_MS, `${trigger}:refresh_token_unavailable`);
+      scheduleRefresh(RETRY_DELAY_MS, 'refresh_token_unavailable');
       return;
     }
 
@@ -123,22 +137,66 @@ async function runScheduledRefresh(trigger: string) {
 
     const updatedTokens = await fetchTokenFromCrm();
     if (isTokenExpired(updatedTokens?.expires_at)) {
-      scheduleRefresh(RETRY_DELAY_MS, `${trigger}:token_still_expired`);
+      scheduleRefresh(RETRY_DELAY_MS, 'token_still_expired');
       return;
     }
   } catch (error) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+    const errorCode = axios.isAxiosError(error) ? (error.response?.data as any)?.error : undefined;
+
     console.error('[RD_STATION] Falha na rotina de refresh de token', {
       trigger,
+      status,
+      error: errorCode,
       message: (error as Error)?.message ?? error
     });
 
-    scheduleRefresh(RETRY_DELAY_MS, `${trigger}:refresh_failed`);
+    if (status === 400 && errorCode === 'invalid_client') {
+      scheduleRefresh(INVALID_CLIENT_RETRY_DELAY_MS, 'invalid_client');
+      return;
+    }
+
+    scheduleRefresh(RETRY_DELAY_MS, 'refresh_failed');
     return;
   } finally {
     refreshInFlight = false;
   }
 
   await scheduleFromCurrentTokenState();
+}
+
+export async function refreshRdTokenNow() {
+  if (refreshInFlight) {
+    throw new Error('Refresh de token ja esta em andamento.');
+  }
+
+  refreshInFlight = true;
+
+  try {
+    const storedTokens = await fetchTokenFromCrm();
+    const refreshToken = cleanSecret(storedTokens?.refresh_token);
+
+    if (!hasUsableRefreshToken(refreshToken)) {
+      throw new Error('Refresh token indisponivel no banco para teste manual.');
+    }
+
+    await refreshAccessToken(refreshToken);
+
+    const updatedTokens = await fetchTokenFromCrm();
+    if (isTokenExpired(updatedTokens?.expires_at)) {
+      throw new Error('Refresh manual concluiu sem atualizar expires_at de forma valida.');
+    }
+
+    await scheduleFromCurrentTokenState();
+
+    return {
+      expires_at: updatedTokens?.expires_at,
+      token_type: updatedTokens?.token_type,
+      expires_in: updatedTokens?.expires_in
+    };
+  } finally {
+    refreshInFlight = false;
+  }
 }
 
 export async function startRdTokenRefreshRoutine() {
@@ -151,4 +209,3 @@ export function stopRdTokenRefreshRoutine() {
   routineStarted = false;
   clearScheduledRefresh();
 }
-
