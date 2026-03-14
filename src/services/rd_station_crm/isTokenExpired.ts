@@ -1,13 +1,17 @@
 const EXPIRY_SAFETY_SECONDS = 300; // 5 min de folga
 
 export function isTokenExpired(expiresAt?: string | number | null): boolean {
-  // Se não há informação de expiração, assuma expirado para forçar refresh/renovação
+  // Se nao ha informacao de expiracao, assuma expirado para forcar refresh/renovacao.
   if (expiresAt == null) return true;
+
   const expiryMs =
     typeof expiresAt === 'number'
       ? expiresAt
       : new Date(expiresAt).getTime();
-  if (Number.isNaN(expiryMs)) return false;
+
+  // Valor invalido de expiracao deve ser tratado como expirado por seguranca.
+  if (Number.isNaN(expiryMs)) return true;
+
   const now = Date.now();
   return expiryMs <= now + EXPIRY_SAFETY_SECONDS * 1000;
 }

@@ -6,6 +6,7 @@ import { promptRootGamefic, promptSalesAgentGamefic, promptSupportAgentGamefic }
 import { createProblemToContact } from './src/services/handleProblems';
 import { createMeetToContact } from './src/services/handleMeet';
 import { getContact, updateContact, updateNameContact } from './src/services/contact';
+import { startRdTokenRefreshRoutine } from './src/services/rd_station_crm';
 import { sendNotificationSquadSales } from './src/services/sendNotificationSquadSales';
 
 /* ======================================================
@@ -15,6 +16,12 @@ import { sendNotificationSquadSales } from './src/services/sendNotificationSquad
 type SessionContext = any;
 
 const NumberSquadSales = "556294079088"
+
+void startRdTokenRefreshRoutine().catch((error) => {
+  console.error('[RD_STATION] Falha ao iniciar rotina automatica de refresh', {
+    message: (error as Error)?.message ?? error
+  });
+});
 
 /* ======================================================
    REGISTER LEAD TOOL

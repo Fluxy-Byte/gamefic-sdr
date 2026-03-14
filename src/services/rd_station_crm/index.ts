@@ -6,6 +6,7 @@ export * from './isNotFound';
 export * from './withRetry';
 export * from './buildContactBody';
 export * from './isTokenExpired';
+export * from './tokenRefreshRoutine';
 export * from './fetchContactByEmail';
 export * from './createContact';
 export * from './updateContact';
